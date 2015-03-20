@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# An alternative to 'free' for use in OpenVZ containers with recent kernels
+# (2.6.32-042stab102.9 and later) that show incorrect memory reporting with 
+# the 'free' utility.
+# This issue seems to affect Debian 7 & Ubuntu 12.04 and later OS versions.
+
+# Created by sleddog. Free for use, modification & redistribution.
+# v. 1. March 20, 2015.
+
+# Check access permission to /proc/user_beancounters.
+
+if [ ! -r "/proc/user_beancounters" ]; then
+	echo "Root permissions required."
+	exit 1
+fi
+
+# Do memory calculates, in MB.
+
+BEAN=`cat /proc/user_beancounters`
+MEM=`cat /proc/meminfo`
+
+USED1=$((`echo "$BEAN" | grep oomguar | awk '{ print $2 }'`/ 256))
+USED2=$((`echo "$BEAN" | grep kmemsiz | awk '{ print $3 }'`/ 1048576))
+TTL_USED=$((`echo "$BEAN" | grep physpag | awk '{ print $2 }'`/ 256))
+CACHE_USED=$((TTL_USED - $USED1 - $USED2))
+TTL_USED2=$((TTL_USED - $CACHE_USED))
+SHM_USED=$((`echo "$BEAN" | grep shmpages | awk '{ print $2 }'`/ 256))
+TTL_AVAIL=$((`echo "$BEAN" | grep physpag | awk '{ print $5 }'`/ 256))
+FREE=$((TTL_AVAIL - $TTL_USED))
+FREE2=$((FREE + $CACHE_USED))
+SWAP_AVAIL=$((`echo "$MEM" | grep SwapTotal | awk '{ print $2 }'` / 1024))
+SWAP_FREE=$((`echo "$MEM" | grep SwapFree | awk '{ print $2 }'` / 1024))
+SWAP_USED=$((SWAP_AVAIL - $SWAP_FREE))
+
+# Pad the number strings for display.
+
+PLEN="%11s"
+CACHE_USED=`printf "$PLEN" $CACHE_USED`
+TTL_USED=`printf "$PLEN" $TTL_USED`
+TTL_USED2=`printf "$PLEN" $TTL_USED2`
+FREE=`printf "$PLEN" $FREE`
+FREE2=`printf "$PLEN" $FREE2`
+TTL_AVAIL=`printf "$PLEN" $TTL_AVAIL`
+SHM_USED=`printf "$PLEN" $SHM_USED`
+SWAP_AVAIL=`printf "$PLEN" $SWAP_AVAIL`
+SWAP_FREE=`printf "$PLEN" $SWAP_FREE`
+SWAP_USED=`printf "$PLEN" $SWAP_USED`
+
+echo "             total       used       free     shared     cached"
+echo "Mem:   ${TTL_AVAIL}${TTL_USED}${FREE}${SHM_USED}${CACHE_USED}"
+echo "-cache:           ${TTL_USED2}${FREE2}"
+echo "Swap:  ${SWAP_AVAIL}${SWAP_USED}${SWAP_FREE}"
+
+exit 0
