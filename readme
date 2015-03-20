@@ -1,0 +1,41 @@
+An alternative to 'free' for use in OpenVZ containers with recent kernels
+(2.6.32-042stab102.9 and later) that show incorrect memory reporting with 
+the 'free' utility.
+
+This issue seems to affect Debian 7 & Ubuntu 12.04 and later OS versions.
+
+Created by sleddog. Free for use, modification & redistribution.
+
+v. 1. March 20, 2015.
+
+
+About
+-----
+
+For OpenVZ containers ONLY.
+
+This is a Bash script. It performs memory calculations based on the values in
+/proc/user_beancounters. Swap usage is read from /proc/meminfo.
+
+As the user_beancounters file is accessible only by root, this script must be
+run by root or via sudo.
+
+
+Installation
+------------
+
+[root@vps ~] cd /usr/bin
+[root@vps /usr/bin] wget https://github.com/sleddoggy/ofree/raw/master/ofree
+[root@vps /usr/bin] chmod 700 ofree
+
+
+Usage
+-----
+
+[root@vps ~] ofree
+
+             total       used       free     shared     cached
+Mem:          1024        443        581         50        317
+-cache:                   126        898
+Swap:         1024          0       1024
+
