@@ -8,6 +8,13 @@
 # Created by sleddog. Free for use, modification & redistribution.
 # v. 1. March 20, 2015.
 
+# Check that this is OpenVz..
+
+if [ ! -e "/proc/user_beancounters" ]; then
+	echo "ofree is for OpenVz containers only."
+	exit 1
+fi
+
 # Check access permission to /proc/user_beancounters.
 
 if [ ! -r "/proc/user_beancounters" ]; then
