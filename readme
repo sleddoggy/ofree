@@ -25,7 +25,7 @@ Installation
 ------------
 
 [root@vps ~] cd /usr/bin
-[root@vps /usr/bin] wget https://github.com/sleddoggy/ofree/raw/master/ofree
+[root@vps /usr/bin] wget --no-check-certificate https://github.com/sleddoggy/ofree/raw/master/ofree
 [root@vps /usr/bin] chmod 700 ofree
 
 
